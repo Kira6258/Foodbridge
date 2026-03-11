@@ -31,3 +31,5 @@ yarn-error.log*
 firebase-adminsdk.json
 .env
 >>>>>>> de2eb92 (Food bridge)
+"__pycache__/" 
+"*.pyc" 
