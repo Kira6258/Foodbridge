@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Volunteer Dashboard - FoodBridge{% endblock %}
+{% block content %}
+<div class="dash-welcome" style="background: var(--primary); color: white; padding: 40px;">
+    <div>
+        <h2 style="margin-bottom: 8px;">Ready to Make a Difference?</h2>
+        <p style="opacity: 0.9;">Find available pickups near you and help deliver food to those in need.</p>
+    </div>
+    <div class="icon-box" style="background: rgba(255,255,255,0.2); color: #fff;">
+        <i class="fas fa-truck-loading"></i>
+    </div>
+</div>
+
+<div class="grid-main">
+    <!-- Available Pickups -->
+    <main class="main-content">
+        <h4 class="fw-bold mb-4 d-flex align-center">
+            <i class="fas fa-map-marker-alt text-primary" style="margin-right: 12px;"></i>
+            Available Pickups
+        </h4>
+
+        <div class="d-flex flex-column gap-2">
+            {% for task in tasks %}
+            <div class="card donation-card"
+                style="display: flex; flex-direction: row; align-items: center; padding: 20px;">
+                <div class="icon-box" style="margin-right: 20px; flex-shrink: 0;">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div style="flex-grow: 1;">
+                    <div class="d-flex justify-between align-center mb-1">
+                        <h5 class="fw-bold">{{ task.food_description }}</h5>
+                        <span class="text-primary fw-bold">{% if task.distance %}{{ task.distance }} km away{% else
+                            %}Nearby{% endif %}</span>
+                    </div>
+                    <p class="small mb-1"><strong>From:</strong> {{ task.donor_name }}</p>
+                    <p class="small text-muted"><strong>To:</strong> {{ task.shelter_name }} ({{ task.shelter_address
+                        }})</p>
+                </div>
+                <div style="margin-left: 20px;">
+                    <form action="{{ url_for('volunteer.accept_delivery', donation_id=task.id) }}" method="POST">
+                        <button type="submit" class="btn btn-primary">Accept</button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="card" style="text-align: center; padding: 40px; opacity: 0.6;">
+                <p>No pending pickups available right now.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- My Deliveries -->
+    <aside class="sidebar">
+        <h4 class="fw-bold mb-4 d-flex align-center">
+            <i class="fas fa-route text-primary" style="margin-right: 12px;"></i>
+            My Deliveries
+        </h4>
+
+        <div class="d-flex flex-column gap-2">
+            {% for deliv in deliveries %}
+            <div class="card" style="padding: 16px; border-left: 4px solid 
+                {% if deliv.status == 'DELIVERED' %}var(--success)
+                {% else %}var(--accent){% endif %};">
+
+                <h6 class="fw-bold mb-2">{{ deliv.food_description }}</h6>
+                <p class="small text-muted mb-4">To: {{ deliv.shelter_name }}</p>
+
+                {% if deliv.status != 'DELIVERED' %}
+                <form action="{{ url_for('volunteer.update_status', delivery_id=deliv.id) }}" method="POST">
+                    <select name="status" class="form-select mb-2" onchange="this.form.submit()"
+                        style="padding: 8px; font-size: 0.85rem;">
+                        <option value="ASSIGNED" {% if deliv.status=='ASSIGNED' %}selected{% endif %}>Assigned</option>
+                        <option value="PICKED UP" {% if deliv.status=='PICKED UP' %}selected{% endif %}>Picked Up
+                        </option>
+                        <option value="ON THE WAY" {% if deliv.status=='ON THE WAY' %}selected{% endif %}>On The Way
+                        </option>
+                        <option value="DELIVERED" {% if deliv.status=='DELIVERED' %}selected{% endif %}>Delivered
+                        </option>
+                    </select>
+                </form>
+                {% else %}
+                <span class="badge badge-success">Completed</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="card" style="text-align: center; padding: 20px; opacity: 0.6;">
+                <p class="small">No delivery history.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+</div>
+{% endblock %}

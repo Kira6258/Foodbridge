@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}My Profile - FoodBridge{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card" style="max-width: 700px; width: 100%; overflow: hidden;">
+        <div style="background: var(--primary); padding: 50px 30px; text-align: center; color: white;">
+            <div class="icon-box"
+                style="width: 100px; height: 100px; font-size: 3rem; margin: 0 auto 20px; background: rgba(255,255,255,0.2); color: #fff;">
+                <i class="fas fa-user"></i>
+            </div>
+            <h2 style="margin-bottom: 5px;">{{ current_user.name }}</h2>
+            <p class="text-capitalize" style="opacity: 0.8; font-weight: 500;">{{ current_user.role }} Account</p>
+        </div>
+
+        <div style="padding: 40px;">
+            <form action="{{ url_for('auth.edit_profile') }}" method="POST" class="mb-5">
+                <h4 class="fw-bold mb-4" style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">
+                    Profile Details
+                </h4>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label small">Full Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ current_user.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label small">Email (Read-only)</label>
+                        <input type="email" class="form-control" value="{{ current_user.email }}" disabled
+                            style="background: #f9f9f9; color: #888;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label small">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" value="{{ current_user.phone }}">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="padding: 12px 30px;">
+                    Save Profile Changes
+                </button>
+            </form>
+
+            <div class="bg-danger-soft"
+                style="padding: 30px; border-radius: var(--radius-md); border: 1px solid rgba(231, 76, 60, 0.2);">
+                <h5 class="text-accent fw-bold mb-2">Danger Zone</h5>
+                <p class="small text-muted mb-4">Deleting your account is permanent and cannot be undone. All your data
+                    will be cleared.</p>
+                <button type="button" class="btn btn-outline-danger" onclick="toggleModal('deleteModal', true)">
+                    Delete My Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Modal -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3 class="fw-bold mb-3">Delete Account?</h3>
+        <p class="text-muted mb-4">Are you sure you want to permanently delete your FoodBridge account? This action is
+            irreversible.</p>
+
+        <div class="d-flex gap-1">
+            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="toggleModal('deleteModal', false)">
+                Cancel
+            </button>
+            <form action="{{ url_for('auth.delete_account') }}" method="POST" style="flex: 1;">
+                <button type="submit" class="btn btn-danger btn-block">
+                    Confirm Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleModal(modalId, show) {
+        const modal = document.getElementById(modalId);
+        if (show) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        } else {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    // Close on click outside
+    window.onclick = function (event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+</script>
+{% endblock %}

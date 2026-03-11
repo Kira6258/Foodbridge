@@ -1,0 +1,7 @@
+Flask
+Flask-Login
+Flask-MySQLdb
+requests
+Werkzeug
+firebase-admin
+python-dotenv

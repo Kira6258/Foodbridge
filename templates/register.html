@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - FoodBridge{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card auth-card" style="max-width: 600px;">
+        <h2 class="auth-title">Join the Mission</h2>
+        <p class="auth-subtitle">Create your FoodBridge account today</p>
+
+        <form id="regForm">
+            <div class="grid-2" style="margin-bottom: var(--spacing-md);">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" id="regPhone" class="form-control" placeholder="+91 ..." required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email address</label>
+                <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="regPassword" class="form-control" placeholder="Create a strong password"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Your Role</label>
+                <select id="roleSelect" class="form-select" required onchange="toggleShelterFields()">
+                    <option value="donor">Donor (Have surplus food)</option>
+                    <option value="shelter">Shelter (Need food for community)</option>
+                    <option value="volunteer">Volunteer (Can help deliver)</option>
+                </select>
+            </div>
+
+            <div id="shelterFields"
+                style="display: none; margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--border);">
+                <h4 class="mb-4">Shelter Details</h4>
+                <div class="form-group">
+                    <label class="form-label">Shelter Address</label>
+                    <input type="text" id="shAddress" class="form-control" placeholder="Full physical address">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Capacity (People)</label>
+                        <input type="number" id="shCapacity" class="form-control" placeholder="e.g. 50">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Person</label>
+                        <input type="text" id="shContact" class="form-control" placeholder="Primary contact name">
+                    </div>
+                </div>
+            </div>
+
+            <div id="locationStatus" class="alert alert-warning small mt-4">
+                <span><i class="fas fa-spinner fa-spin"></i> Detecting your location...</span>
+            </div>
+
+            <input type="hidden" id="lat">
+            <input type="hidden" id="lng">
+
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block mb-4" disabled
+                style="margin-top: 10px;">
+                <span id="btnText">Detecting Location...</span>
+            </button>
+
+            <div class="hr-text"><span>OR</span></div>
+
+            <button type="button" id="googleBtn" class="btn btn-outline btn-block"
+                style="border-color: #ddd; color: var(--text-main);">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"
+                    style="margin-right: 10px;">
+                Sign up with Google
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+    import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    function toggleShelterFields() {
+        const role = document.getElementById('roleSelect').value;
+        const shelterFields = document.getElementById('shelterFields');
+        shelterFields.style.display = role === 'shelter' ? 'block' : 'none';
+
+        // Make fields required if shelter is selected
+        const inputs = shelterFields.querySelectorAll('input');
+        inputs.forEach(input => input.required = (role === 'shelter'));
+    }
+    window.toggleShelterFields = toggleShelterFields;
+
+    const latInput = document.getElementById('lat');
+    const lngInput = document.getElementById('lng');
+    const submitBtn = document.getElementById('submitBtn');
+    const locStatus = document.getElementById('locationStatus');
+    const btnText = document.getElementById('btnText');
+
+    // Auto-detect location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            latInput.value = position.coords.latitude;
+            lngInput.value = position.coords.longitude;
+            submitBtn.disabled = false;
+            btnText.innerText = "Create Account";
+            locStatus.className = "alert alert-success small mt-4";
+            locStatus.innerHTML = '<span><i class="fas fa-check-circle"></i> Location detected!</span>';
+        }, function (error) {
+            console.error("Location error:", error);
+            submitBtn.disabled = false;
+            btnText.innerText = "Create Account (Manual Location)";
+            locStatus.className = "alert alert-info small mt-4";
+            locStatus.innerHTML = '<span><i class="fas fa-info-circle"></i> Proceeding with manual location.</span>';
+        });
+    }
+
+    async function sendToServer(idToken, extraData) {
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken, ...extraData })
+            });
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = "{{ url_for('auth.login') }}";
+            } else {
+                alert("Database Error: " + result.error);
+            }
+        } catch (error) {
+            alert("Network Error: " + error.message);
+        }
+    }
+
+    document.getElementById('regForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const extraData = {
+            name: document.getElementById('regName').value,
+            role: document.getElementById('roleSelect').value,
+            phone: document.getElementById('regPhone').value,
+            lat: latInput.value,
+            lng: lngInput.value,
+            address: document.getElementById('shAddress').value,
+            capacity: document.getElementById('shCapacity').value,
+            contact: document.getElementById('shContact').value
+        };
+
+        try {
+            submitBtn.disabled = true;
+            btnText.innerText = "Registering...";
+            const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+            const idToken = await userCredential.user.getIdToken();
+            await sendToServer(idToken, extraData);
+        } catch (error) {
+            alert("Firebase Error: " + error.message);
+            submitBtn.disabled = false;
+            btnText.innerText = "Create Account";
+        }
+    });
+
+    document.getElementById('googleBtn').addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(window.auth, provider);
+            const idToken = await result.user.getIdToken();
+            const extraData = {
+                name: result.user.displayName,
+                role: document.getElementById('roleSelect').value,
+                phone: result.user.phoneNumber || "",
+                lat: latInput.value,
+                lng: lngInput.value
+            };
+            await sendToServer(idToken, extraData);
+        } catch (error) {
+            alert("Google Login Error: " + error.message);
+        }
+    });
+
+</script>
+{% endblock %}

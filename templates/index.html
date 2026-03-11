@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to FoodBridge - Small Help, Big Impact{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div>
+        <h1 class="hero-title">Connecting Surplus to Need.</h1>
+        <p class="hero-lead">FoodBridge is a community-driven platform designed to minimize food waste.
+            Whether you're a wedding caterer with leftovers or a shelter in need of meals, we bridge the gap in just a
+            few clicks.</p>
+        <div class="d-flex gap-2">
+            {% if current_user.is_authenticated %}
+            {% if current_user.role == 'donor' %}
+            <a href="{{ url_for('donor.dashboard') }}" class="btn btn-primary btn-large">Donate Food Now</a>
+            {% elif current_user.role == 'shelter' %}
+            <a href="{{ url_for('shelter.dashboard') }}" class="btn btn-primary btn-large">Claim Food Near You</a>
+            {% elif current_user.role == 'admin' %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-large">Admin Dashboard</a>
+            {% else %}
+            <a href="{{ url_for('auth.profile') }}" class="btn btn-primary btn-large">Go to Dashboard</a>
+            {% endif %}
+            {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-large">Join the Mission</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-large">Login</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-image-box">
+        <i class="fas fa-hand-holding-heart hero-icon"></i>
+        <div class="d-flex gap-1" style="justify-content: center;">
+            <span class="badge badge-success">Verified Community</span>
+            <span class="badge badge-info">Real-time Tracking</span>
+            <span class="badge badge-warning">Safe & Secure</span>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="features">
+    <div class="feature-item">
+        <div class="card">
+            <i class="fas fa-users text-primary"></i>
+            <h4 class="fw-bold mb-3">For Donors</h4>
+            <p class="small text-muted mb-4">Don't let good food go to waste. Simply snap a photo, set a pickup time,
+                and we'll notify shelters
+                nearby.</p>
+            {% if current_user.role == 'donor' %}
+            <a href="{{ url_for('donor.dashboard') }}" class="btn btn-primary small">Start Donating</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="feature-item">
+        <div class="card">
+            <i class="fas fa-home text-success"></i>
+            <h4 class="fw-bold mb-3">For Shelters</h4>
+            <p class="small text-muted mb-4">Receive fresh donations near your location. Approved shelters can claim and
+                receive food
+                directly.</p>
+            {% if current_user.role == 'shelter' %}
+            <a href="{{ url_for('shelter.dashboard') }}" class="btn btn-primary small"
+                style="background: var(--success);">Claim Food</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="feature-item">
+        <div class="card">
+            <i class="fas fa-motorcycle text-info"></i>
+            <h4 class="fw-bold mb-3">For Volunteers</h4>
+            <p class="small text-muted mb-4">Be the bridge. Pick up donations and deliver them securely. Your small
+                drive makes a massive difference.
+            </p>
+            {% if current_user.role == 'volunteer' %}
+            <a href="{{ url_for('volunteer.dashboard') }}" class="btn btn-primary small"
+                style="background: #3498db;">Find Deliveries</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

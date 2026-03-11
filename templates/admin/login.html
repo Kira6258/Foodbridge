@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login - FoodBridge{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card auth-card" style="border-top: 5px solid var(--text-main);">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="icon-box" style="background: var(--text-main); color: white; margin: 0 auto 15px;">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h2 class="auth-title">Admin Portal</h2>
+            <p class="auth-subtitle">Verify your administrative credentials</p>
+        </div>
+
+        <form id="adminLoginForm">
+            <div class="form-group">
+                <label class="form-label">Admin Email</label>
+                <input type="email" id="adminEmail" class="form-control" placeholder="admin@foodbridge.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="adminPassword" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" id="adminLoginBtn" class="btn btn-dark btn-block">
+                Verify & Access Portal
+            </button>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    const loginForm = document.getElementById('adminLoginForm');
+    const loginBtn = document.getElementById('adminLoginBtn');
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('adminEmail').value;
+        const password = document.getElementById('adminPassword').value;
+
+        loginBtn.disabled = true;
+        loginBtn.innerText = "Verifying...";
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(window.auth, email, password);
+            const idToken = await userCredential.user.getIdToken();
+
+            const response = await fetch("{{ url_for('auth.login') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ idToken: idToken })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = result.redirect;
+            } else {
+                alert("Access Denied: " + result.error);
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Verify & Access";
+            }
+        } catch (error) {
+            alert("Auth Error: " + error.message);
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Verify & Access";
+        }
+    });
+</script>
+{% endblock %}

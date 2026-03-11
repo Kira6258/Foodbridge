@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - FoodBridge{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card auth-card">
+        <h2 class="auth-title">Welcome Back</h2>
+        <p class="auth-subtitle">Login to your FoodBridge account</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Email address</label>
+                <input type="email" id="loginEmail" class="form-control" required placeholder="name@example.com">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+            </div>
+
+            <div class="d-flex justify-between align-center mb-4">
+                <label class="d-flex align-center gap-1 small" style="cursor: pointer;">
+                    <input type="checkbox" id="remember"> Remember me
+                </label>
+                <a href="#" onclick="forgotPassword()" class="small text-primary fw-bold">Forgot Password?</a>
+            </div>
+
+            <button type="submit" id="loginBtn" class="btn btn-primary btn-block">
+                Login
+            </button>
+
+            <div class="hr-text"><span>OR</span></div>
+
+            <button type="button" id="googleLoginBtn" class="btn btn-outline btn-block"
+                style="border-color: #ddd; color: var(--text-main);">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"
+                    style="margin-right: 10px;">
+                Continue with Google
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+    import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    const loginBtn = document.getElementById('loginBtn');
+
+    async function handleLogin(idToken) {
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken })
+            });
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = "{{ url_for('index') }}"; // Redirect to home or dashboard
+            } else {
+                alert("Login failed: " + result.error);
+                if (result.error.includes("register")) {
+                    window.location.href = "{{ url_for('auth.register') }}";
+                }
+            }
+        } catch (error) {
+            alert("Network Error: " + error.message);
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            loginBtn.disabled = true;
+            loginBtn.innerText = "Logging in...";
+            const userCredential = await signInWithEmailAndPassword(window.auth, email, password);
+            const idToken = await userCredential.user.getIdToken();
+            await handleLogin(idToken);
+        } catch (error) {
+            alert("Firebase Login Error: " + error.message);
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Login";
+        }
+    });
+
+    document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(window.auth, provider);
+            const idToken = await result.user.getIdToken();
+            await handleLogin(idToken);
+        } catch (error) {
+            alert("Google Login Error: " + error.message);
+        }
+    });
+
+    window.forgotPassword = async () => {
+        const emailInput = document.getElementById('loginEmail');
+        const email = emailInput.value.trim();
+
+        if (!email) {
+            alert("Please enter your email address in the email field first.");
+            emailInput.focus();
+            return;
+        }
+
+        // Basic email regex check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert("Please enter a valid email address (e.g., name@example.com).");
+            emailInput.focus();
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(window.auth, email);
+            alert("Success! A password reset link has been sent to: " + email);
+        } catch (error) {
+            if (error.code === 'auth/user-not-found') {
+                alert("This email is not registered in our system.");
+            } else {
+                alert("Error: " + error.message);
+            }
+        }
+    };
+</script>
+<style>
+    .hr-text {
+        position: relative;
+        border-bottom: 1px solid #dee2e6;
+        margin: 25px 0;
+    }
+
+    .hr-text span {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        padding: 0 15px;
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    .card {
+        border: none !important;
+    }
+</style>
+{% endblock %}
