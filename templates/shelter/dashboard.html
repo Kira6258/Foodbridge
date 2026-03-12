@@ -1,111 +1,115 @@
 {% extends 'base.html' %}
 {% block title %}Shelter Dashboard - FoodBridge{% endblock %}
 {% block content %}
-<div class="dash-welcome">
-    <div>
-        <h2 class="text-primary" style="margin-bottom: 4px;">Welcome back, {{ current_user.name }}!</h2>
-        <p class="text-muted small">Helping you coordinate surplus food for your community.</p>
+<div class="animate-fade-up">
+    <div class="dash-welcome mb-5">
+        <div>
+            <h1 class="hero-title" style="font-size: 2.5rem; margin-bottom: 8px;">Hello, {{ current_user.name }}!</h1>
+            <p class="hero-lead" style="font-size: 1.1rem; margin-bottom: 0;">Coordinate surplus food for your community today.</p>
+        </div>
+        <div class="icon-box" style="width: 80px; height: 80px; font-size: 2.5rem; background: var(--grad-primary); color: white;">
+            <i class="fas fa-home"></i>
+        </div>
     </div>
-    <div class="icon-box" style="width: 60px; height: 60px; font-size: 2rem;">
-        <i class="fas fa-warehouse"></i>
-    </div>
-</div>
 
-<div class="grid-main">
-    <!-- Available Donations -->
-    <main class="main-content">
-        <h4 class="fw-bold mb-4 d-flex align-center">
-            <i class="fas fa-search-location text-primary" style="margin-right: 12px;"></i>
-            Available Food Near You
-        </h4>
+    <div class="grid-main">
+        <!-- Available Donations -->
+        <main class="main-content">
+            <h4 class="fw-bold mb-4 d-flex align-center">
+                <i class="fas fa-location-crosshairs text-primary" style="margin-right: 12px;"></i>
+                Nearby Surplus Food
+            </h4>
 
-        <div class="donation-grid">
-            {% for donation in donations %}
-            <div class="card donation-card">
-                <div class="donation-img-wrapper">
-                    {% if donation.photo %}
-                    <img src="{{ url_for('static', filename='uploads/' + donation.photo) }}" class="donation-img"
-                        alt="Food">
-                    {% else %}
-                    <div class="donation-placeholder">
-                        <i class="fas fa-utensils fa-2x"></i>
+            <div class="premium-grid">
+                {% for donation in donations %}
+                <div class="card donation-card">
+                    <div class="donation-img-wrapper">
+                        {% if donation.photo %}
+                        <img src="{{ url_for('static', filename='uploads/' + donation.photo) }}" class="donation-img" alt="Food">
+                        {% else %}
+                        <div class="donation-placeholder">
+                            <i class="fas fa-utensils fa-3x"></i>
+                        </div>
+                        {% endif %}
+                        <div class="dist-tag">
+                            <i class="fas fa-route"></i> {% if donation.distance %}{{ donation.distance }} km{% else %}Nearby{% endif %}
+                        </div>
                     </div>
-                    {% endif %}
-                    <span class="badge donation-badge">{% if donation.distance %}{{ donation.distance }} km{% else
-                        %}Nearby{% endif %}</span>
+                    <div class="donation-content" style="padding: 24px;">
+                        <h4 class="fw-bold mb-3" style="color: var(--primary);">{{ donation.food_description }}</h4>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <div class="d-flex align-center gap-1 mb-2">
+                                <i class="fas fa-weight-scale text-primary" style="width: 20px;"></i>
+                                <span class="small"><strong>Quantity:</strong> {{ donation.quantity }}</span>
+                            </div>
+                            <div class="d-flex align-center gap-1 mb-2">
+                                <i class="fas fa-user-circle text-primary" style="width: 20px;"></i>
+                                <span class="small"><strong>From:</strong> {{ donation.donor_name }}</span>
+                            </div>
+                            <div class="d-flex align-center gap-1 text-error">
+                                <i class="fas fa-clock" style="width: 20px;"></i>
+                                <span class="small"><strong>Pickup by:</strong> {{ donation.available_until }}</span>
+                            </div>
+                        </div>
+
+                        <form action="{{ url_for('shelter.claim_donation', donation_id=donation.id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary btn-block">Claim Now</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="donation-content">
-                    <h5 class="fw-bold mb-3">{{ donation.food_description }}</h5>
-                    <div class="donation-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-weight-hanging text-primary"></i>
-                            <span><strong>Quantity:</strong> {{ donation.quantity }}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-user-circle text-primary"></i>
-                            <span><strong>Donor:</strong> {{ donation.donor_name }}</span>
-                        </div>
-                        <div class="meta-item text-danger">
-                            <i class="fas fa-clock"></i>
-                            <span><strong>Pickup by:</strong> {{ donation.available_until }}</span>
-                        </div>
+                {% else %}
+                <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 100px; opacity: 0.6;">
+                    <i class="fas fa-moon fa-4x mb-4 text-primary"></i>
+                    <h5 class="fw-bold">Everything stands still.</h5>
+                    <p>No new donations are available right now. We'll notify you as soon as someone shares surplus food nearby.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <!-- My Claims Section -->
+        <aside class="sidebar">
+            <h4 class="fw-bold mb-4 d-flex align-center">
+                <i class="fas fa-clipboard-check text-primary" style="margin-right: 12px;"></i>
+                My Active Claims
+            </h4>
+
+            <div class="d-flex flex-column gap-3">
+                {% for claim in claims %}
+                <div class="card" style="padding: 20px; border-left: 6px solid 
+                    {% if claim.donation_status == 'CLAIMED' %}var(--info)
+                    {% elif claim.donation_status == 'DELIVERED' %}var(--success)
+                    {% else %}var(--accent){% endif %}; transition: transform 0.2s;" onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='none'">
+
+                    <div class="d-flex justify-between align-center mb-3">
+                        <span class="fw-bold" style="font-size: 1rem; color: var(--primary);">
+                            {{ claim.food_description }}
+                        </span>
+                        <span class="badge 
+                            {% if claim.donation_status == 'CLAIMED' %}badge-primary
+                            {% elif claim.donation_status == 'DELIVERED' %}badge-success
+                            {% else %}badge-warning{% endif %}">
+                            {{ claim.donation_status }}
+                        </span>
                     </div>
-                    <form action="{{ url_for('shelter.claim_donation', donation_id=donation.id) }}" method="POST">
-                        <button type="submit" class="btn btn-primary btn-block">Claim This Food</button>
+
+                    <p class="small text-muted mb-4"><i class="fas fa-calendar-alt"></i> Claimed {{ claim.claimed_at }}</p>
+
+                    {% if claim.donation_status == 'CLAIMED' or claim.donation_status == 'PICKED UP' %}
+                    <form action="{{ url_for('shelter.receive_donation', donation_id=claim.donation_id) }}" method="POST">
+                        <button type="submit" class="btn btn-outline btn-block small" style="border-width: 1px;">Confirm Receipt</button>
                     </form>
+                    {% endif %}
                 </div>
-            </div>
-            {% else %}
-            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 60px; opacity: 0.6;">
-                <i class="fas fa-cookie-bite" style="font-size: 3rem; margin-bottom: 16px;"></i>
-                <h5>No new donations available right now.</h5>
-                <p class="small">Check back soon! We'll notify you if something comes up.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </main>
-
-    <!-- My Claims Section -->
-    <aside class="sidebar">
-        <h4 class="fw-bold mb-4 d-flex align-center">
-            <i class="fas fa-clipboard-check text-primary" style="margin-right: 12px;"></i>
-            My Claims
-        </h4>
-
-        <div class="d-flex flex-column gap-2">
-            {% for claim in claims %}
-            <div class="card" style="padding: 16px; border-left: 4px solid 
-                {% if claim.donation_status == 'CLAIMED' %}var(--primary)
-                {% elif claim.donation_status == 'DELIVERED' %}var(--success)
-                {% else %}var(--accent){% endif %};">
-
-                <div class="d-flex justify-between align-center mb-4">
-                    <span class="fw-bold"
-                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">
-                        {{ claim.food_description }}
-                    </span>
-                    <span class="badge 
-                        {% if claim.donation_status == 'CLAIMED' %}badge-info
-                        {% elif claim.donation_status == 'DELIVERED' %}badge-success
-                        {% else %}badge-warning{% endif %}">
-                        {{ claim.donation_status }}
-                    </span>
+                {% else %}
+                <div class="card" style="text-align: center; padding: 40px; opacity: 0.6; border-style: dashed;">
+                    <i class="fas fa-box-open fa-2x mb-2"></i>
+                    <p class="small">No active claims at the moment.</p>
                 </div>
-
-                <p class="small text-muted mb-4">Claimed: {{ claim.claimed_at }}</p>
-
-                {% if claim.donation_status == 'CLAIMED' or claim.donation_status == 'PICKED UP' %}
-                <form action="{{ url_for('shelter.receive_donation', donation_id=claim.donation_id) }}" method="POST">
-                    <button type="submit" class="btn btn-outline btn-block small">Mark as Received</button>
-                </form>
-                {% endif %}
+                {% endfor %}
             </div>
-            {% else %}
-            <div class="card" style="text-align: center; padding: 20px; opacity: 0.6;">
-                <p class="small">No active claims.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </aside>
+        </aside>
+    </div>
 </div>
-{% endblock %}
+{% endblock %}

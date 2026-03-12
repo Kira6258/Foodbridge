@@ -1,72 +1,92 @@
 {% extends 'base.html' %}
 {% block title %}My Profile - FoodBridge{% endblock %}
 {% block content %}
-<div class="auth-wrapper">
-    <div class="card" style="max-width: 700px; width: 100%; overflow: hidden;">
-        <div style="background: var(--primary); padding: 50px 30px; text-align: center; color: white;">
-            <div class="icon-box"
-                style="width: 100px; height: 100px; font-size: 3rem; margin: 0 auto 20px; background: rgba(255,255,255,0.2); color: #fff;">
-                <i class="fas fa-user"></i>
+<div class="animate-fade-up" style="max-width: 800px; margin: 0 auto;">
+    <div class="card" style="padding: 0 !important; overflow: hidden; border: none;">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-shield"></i>
             </div>
-            <h2 style="margin-bottom: 5px;">{{ current_user.name }}</h2>
-            <p class="text-capitalize" style="opacity: 0.8; font-weight: 500;">{{ current_user.role }} Account</p>
+            <h1 class="fw-bold mb-2">{{ current_user.name }}</h1>
+            <div class="d-flex justify-center">
+                <span class="badge badge-primary" style="padding: 6px 16px; color: white; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-award"></i> {{ current_user.role }}
+                </span>
+            </div>
         </div>
 
-        <div style="padding: 40px;">
-            <form action="{{ url_for('auth.edit_profile') }}" method="POST" class="mb-5">
-                <h4 class="fw-bold mb-4" style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">
-                    Profile Details
-                </h4>
+        <!-- Profile Body -->
+        <div class="profile-body">
+            <form action="{{ url_for('auth.edit_profile') }}" method="POST">
+                <div class="d-flex align-center mb-5">
+                    <h3 class="fw-bold mb-0" style="color: var(--primary); flex-grow: 1;">Personal Information</h3>
+                    <div style="height: 2px; flex-grow: 1; background: var(--border); margin-left: 24px; opacity: 0.5;"></div>
+                </div>
 
                 <div class="grid-2">
                     <div class="form-group">
-                        <label class="form-label small">Full Name</label>
-                        <input type="text" name="name" class="form-control" value="{{ current_user.name }}" required>
+                        <label class="form-label">Full Name</label>
+                        <div class="input-group">
+                            <input type="text" name="name" class="form-control" value="{{ current_user.name }}" required>
+                            <i class="fas fa-signature"></i>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label small">Email (Read-only)</label>
-                        <input type="email" class="form-control" value="{{ current_user.email }}" disabled
-                            style="background: #f9f9f9; color: #888;">
+                        <label class="form-label">Email Address (Locked)</label>
+                        <div class="input-group">
+                            <input type="email" class="form-control" value="{{ current_user.email }}" disabled style="background: #fdfdfd; opacity: 0.7;">
+                            <i class="fas fa-envelope-open" style="opacity: 0.3;"></i>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label small">Phone Number</label>
-                    <input type="text" name="phone" class="form-control" value="{{ current_user.phone }}">
+                <div class="form-group mb-5">
+                    <label class="form-label">Phone Number</label>
+                    <div class="input-group">
+                        <input type="text" name="phone" class="form-control" value="{{ current_user.phone }}">
+                        <i class="fas fa-phone"></i>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="padding: 12px 30px;">
-                    Save Profile Changes
-                </button>
+                <div class="mb-5">
+                    <button type="submit" class="btn btn-primary" style="padding: 16px 40px;">
+                        Update Profile Details
+                    </button>
+                </div>
             </form>
 
-            <div class="bg-danger-soft"
-                style="padding: 30px; border-radius: var(--radius-md); border: 1px solid rgba(231, 76, 60, 0.2);">
-                <h5 class="text-accent fw-bold mb-2">Danger Zone</h5>
-                <p class="small text-muted mb-4">Deleting your account is permanent and cannot be undone. All your data
-                    will be cleared.</p>
-                <button type="button" class="btn btn-outline-danger" onclick="toggleModal('deleteModal', true)">
-                    Delete My Account
+            <!-- Danger Zone -->
+            <div class="danger-zone">
+                <div class="d-flex align-center mb-3">
+                    <i class="fas fa-triangle-exclamation text-error" style="font-size: 1.5rem; margin-right: 15px;"></i>
+                    <h4 class="fw-bold mb-0">Danger Zone</h4>
+                </div>
+                <p class="text-muted mb-4">Deleting your account is permanent. All associated donations, claims, and records will be purged from our servers and cannot be recovered.</p>
+                <button type="button" class="btn btn-outline" style="color: #dc2626; border-color: #fecaca; background: white;" onclick="toggleModal('deleteModal', true)">
+                    Permanently Delete Account
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Custom Modal -->
+<!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="modal-overlay">
     <div class="modal-card">
-        <h3 class="fw-bold mb-3">Delete Account?</h3>
-        <p class="text-muted mb-4">Are you sure you want to permanently delete your FoodBridge account? This action is
-            irreversible.</p>
+        <div class="icon-box mb-4" style="background: #fee2e2; color: #dc2626;">
+            <i class="fas fa-trash-can"></i>
+        </div>
+        <h3 class="fw-bold mb-2">Are you absolutely sure?</h3>
+        <p class="text-muted mb-4">This action cannot be undone. This will permanently delete your account and remove all your data from our system.</p>
 
-        <div class="d-flex gap-1">
-            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="toggleModal('deleteModal', false)">
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline flex-grow-1" onclick="toggleModal('deleteModal', false)">
                 Cancel
             </button>
-            <form action="{{ url_for('auth.delete_account') }}" method="POST" style="flex: 1;">
+            <form action="{{ url_for('auth.delete_account') }}" method="POST" class="flex-grow-1">
                 <button type="submit" class="btn btn-danger btn-block">
-                    Confirm Delete
+                    Delete Forever
                 </button>
             </form>
         </div>
@@ -85,12 +105,10 @@
         }
     }
 
-    // Close on click outside
     window.onclick = function (event) {
         if (event.target.classList.contains('modal-overlay')) {
-            event.target.classList.remove('active');
-            document.body.style.overflow = '';
+            toggleModal(event.target.id, false);
         }
     }
 </script>
-{% endblock %}
+{% endblock %}

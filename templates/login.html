@@ -3,45 +3,54 @@
 {% block title %}Login - FoodBridge{% endblock %}
 
 {% block content %}
-<div class="auth-wrapper">
-    <div class="card auth-card">
-        <h2 class="auth-title">Welcome Back</h2>
-        <p class="auth-subtitle">Login to your FoodBridge account</p>
+<div class="auth-section">
+    <div class="card auth-card-premium card-accent-top" style="max-width: 480px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div class="icon-box" style="margin: 0 auto 20px;">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h1 class="fw-bold" style="font-size: 2rem; color: var(--primary);">Welcome Back</h1>
+            <p class="text-muted">Login to continue your mission.</p>
+        </div>
 
         <form id="loginForm">
             <div class="form-group">
-                <label class="form-label">Email address</label>
-                <input type="email" id="loginEmail" class="form-control" required placeholder="name@example.com">
+                <label class="form-label">Email Address</label>
+                <div class="input-group">
+                    <input type="email" id="loginEmail" class="form-control" required placeholder="name@example.com">
+                    <i class="fas fa-envelope"></i>
+                </div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Password</label>
-                <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                <div class="input-group">
+                    <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                    <i class="fas fa-key"></i>
+                </div>
             </div>
 
-            <div class="d-flex justify-between align-center mb-4">
-                <label class="d-flex align-center gap-1 small" style="cursor: pointer;">
-                    <input type="checkbox" id="remember"> Remember me
+            <div class="d-flex justify-between align-center mb-5">
+                <label class="d-flex align-center gap-1 small fw-bold" style="cursor: pointer; opacity: 0.8;">
+                    <input type="checkbox" id="remember" style="accent-color: var(--primary);"> Remember me
                 </label>
                 <a href="#" onclick="forgotPassword()" class="small text-primary fw-bold">Forgot Password?</a>
             </div>
 
-            <button type="submit" id="loginBtn" class="btn btn-primary btn-block">
-                Login
+            <button type="submit" id="loginBtn" class="btn btn-primary btn-block" style="padding: 16px;">
+                Sign In
             </button>
 
             <div class="hr-text"><span>OR</span></div>
 
-            <button type="button" id="googleLoginBtn" class="btn btn-outline btn-block"
-                style="border-color: #ddd; color: var(--text-main);">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"
-                    style="margin-right: 10px;">
+            <button type="button" id="googleLoginBtn" class="btn btn-google btn-block">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" style="margin-right: 12px;">
                 Continue with Google
             </button>
         </form>
 
-        <div class="auth-footer">
-            <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+        <div style="text-align: center; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--border);">
+            <p class="small text-muted">Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-primary fw-bold">Create one now</a></p>
         </div>
     </div>
 </div>
@@ -62,7 +71,7 @@
             });
             const result = await response.json();
             if (result.success) {
-                window.location.href = "{{ url_for('index') }}"; // Redirect to home or dashboard
+                window.location.href = "{{ url_for('index') }}";
             } else {
                 alert("Login failed: " + result.error);
                 if (result.error.includes("register")) {
@@ -81,14 +90,14 @@
 
         try {
             loginBtn.disabled = true;
-            loginBtn.innerText = "Logging in...";
+            loginBtn.innerText = "Verifying...";
             const userCredential = await signInWithEmailAndPassword(window.auth, email, password);
             const idToken = await userCredential.user.getIdToken();
             await handleLogin(idToken);
         } catch (error) {
-            alert("Firebase Login Error: " + error.message);
+            alert("Authentication Error: " + error.message);
             loginBtn.disabled = false;
-            loginBtn.innerText = "Login";
+            loginBtn.innerText = "Sign In";
         }
     });
 
@@ -99,7 +108,7 @@
             const idToken = await result.user.getIdToken();
             await handleLogin(idToken);
         } catch (error) {
-            alert("Google Login Error: " + error.message);
+            alert("Google Auth Error: " + error.message);
         }
     });
 
@@ -108,51 +117,17 @@
         const email = emailInput.value.trim();
 
         if (!email) {
-            alert("Please enter your email address in the email field first.");
-            emailInput.focus();
-            return;
-        }
-
-        // Basic email regex check
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            alert("Please enter a valid email address (e.g., name@example.com).");
+            alert("Please enter your email address first.");
             emailInput.focus();
             return;
         }
 
         try {
             await sendPasswordResetEmail(window.auth, email);
-            alert("Success! A password reset link has been sent to: " + email);
+            alert("A password reset link has been sent to your email.");
         } catch (error) {
-            if (error.code === 'auth/user-not-found') {
-                alert("This email is not registered in our system.");
-            } else {
-                alert("Error: " + error.message);
-            }
+            alert("Error: " + error.message);
         }
     };
 </script>
-<style>
-    .hr-text {
-        position: relative;
-        border-bottom: 1px solid #dee2e6;
-        margin: 25px 0;
-    }
-
-    .hr-text span {
-        position: absolute;
-        top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #fff;
-        padding: 0 15px;
-        font-size: 14px;
-        color: #6c757d;
-    }
-
-    .card {
-        border: none !important;
-    }
-</style>
 {% endblock %}

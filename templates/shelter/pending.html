@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Account Pending - FoodBridge{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 text-center mt-5">
-        <i class="fas fa-clock fa-5x text-warning mb-4"></i>
-        <h2>Account Pending Approval</h2>
-        <p class="lead">Thank you for registering your shelter. An admin will review and approve your registration soon.
-        </p>
-        <p>Once approved, you will be able to claim food donations near you.</p>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary">Logout</a>
+<div class="auth-wrapper animate-fade-up">
+    <div class="card" style="max-width: 600px; text-align: center; padding: 60px;">
+        <i class="fas fa-clock fa-5x text-primary mb-4" style="opacity: 0.8;"></i>
+        <h2 class="fw-bold mb-3" style="color: var(--primary);">Account Pending Approval</h2>
+        <p class="lead mb-4">Thank you for registering your shelter. An admin will review and approve your registration soon.</p>
+        <p class="text-muted mb-5">Once approved, you will be able to claim food donations near you.</p>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline" style="padding: 12px 40px;">Logout</a>
     </div>
 </div>
 {% endblock %}

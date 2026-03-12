@@ -1,77 +1,110 @@
 {% extends 'base.html' %}
 {% block title %}Admin Dashboard - FoodBridge{% endblock %}
 {% block content %}
-<div class="grid-3 mb-5">
-    <div class="card" style="background: var(--primary); color: white; padding: 30px;">
-        <h2 class="fw-bold mb-1">{{ total_donations }}</h2>
-        <p class="small" style="opacity: 0.8;">Total Donations</p>
-    </div>
-    <div class="card" style="background: var(--success); color: white; padding: 30px;">
-        <h2 class="fw-bold mb-1">{{ total_shelters }}</h2>
-        <p class="small" style="opacity: 0.8;">Total Shelters</p>
-    </div>
-    <div class="card" style="background: #3498db; color: white; padding: 30px;">
-        <h2 class="fw-bold mb-1">{{ total_volunteers }}</h2>
-        <p class="small" style="opacity: 0.8;">Volunteer Heroes</p>
-    </div>
-</div>
-
-<div class="grid-2">
-    <div class="card" style="padding: 30px;">
-        <h4 class="fw-bold mb-4">Pending Shelter Approvals</h4>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Shelter</th>
-                        <th>Address</th>
-                        <th style="text-align: right;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for s in pending_shelters %}
-                    <tr>
-                        <td><strong>{{ s.name }}</strong></td>
-                        <td>{{ s.address }}</td>
-                        <td style="text-align: right;">
-                            <form action="{{ url_for('admin.approve_shelter', shelter_id=s.id) }}" method="POST">
-                                <button class="btn btn-primary small">Approve</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" style="text-align: center; opacity: 0.5; padding: 40px;">No pending approvals.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="animate-fade-up">
+    <div class="dash-welcome premium mb-5">
+        <div>
+            <h1 class="fw-bold" style="font-size: 2.5rem; margin-bottom: 8px;">Hero in Motion</h1>
+            <p class="hero-lead">{{ current_user.name }}, find available pickups and bridge the gap today.</p>
+        </div>
+        <div class="icon-box" style="width: 80px; height: 80px; font-size: 2.5rem; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2);">
+            <i class="fas fa-truck-fast"></i>
         </div>
     </div>
 
-    <div class="card" style="padding: 30px;">
-        <h4 class="fw-bold mb-4">User Management</h4>
-        <div class="table-container" style="max-height: 400px;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Joined</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in users %}
-                    <tr>
-                        <td>{{ u.name }}</td>
-                        <td><span class="badge border">{{ u.role }}</span></td>
-                        <td><small class="text-muted">{{ u.created_at.strftime('%Y-%m-%d') }}</small></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="grid-3 mb-5">
+        <div class="card stat-card primary">
+            <h1 class="stat-number">{{ total_donations }}</h1>
+            <p class="stat-label">Total Donations</p>
+            <i class="fas fa-hand-holding-heart stat-icon-large"></i>
+        </div>
+        <div class="card stat-card success">
+            <h1 class="stat-number">{{ total_shelters }}</h1>
+            <p class="stat-label text-muted">Registered Shelters</p>
+            <i class="fas fa-home stat-icon-large"></i>
+        </div>
+        <div class="card stat-card info">
+            <h1 class="stat-number">{{ total_volunteers }}</h1>
+            <p class="stat-label text-muted">Active Volunteers</p>
+            <i class="fas fa-truck-fast stat-icon-large"></i>
+        </div>
+    </div>
+
+    <div class="grid-main">
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="table-header-group">
+                <h4>Pending Approvals</h4>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 40px;">Shelter Name</th>
+                            <th>Location</th>
+                            <th style="text-align: right; padding-right: 40px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in pending_shelters %}
+                        <tr>
+                            <td style="padding-left: 40px;">
+                                <div class="fw-bold">{{ s.name }}</div>
+                                <div class="small text-muted">ID: #{{ s.id }}</div>
+                            </td>
+                            <td>{{ s.address }}</td>
+                            <td style="text-align: right; padding-right: 40px;">
+                                <form action="{{ url_for('admin.approve_shelter', shelter_id=s.id) }}" method="POST">
+                                    <button class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">Approve</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3">
+                                <div class="empty-state">
+                                    <i class="fas fa-check-double mb-3"></i>
+                                    <p>No pending shelter registrations.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 25px 40px; border-bottom: 1px solid var(--border); background: #fafafa;">
+                <h4 class="fw-bold mb-0" style="color: var(--primary);">User Directory</h4>
+            </div>
+            <div class="table-container" style="max-height: 500px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 40px;">User</th>
+                            <th>Role</th>
+                            <th style="padding-right: 40px;">Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td style="padding-left: 40px;">
+                                <div class="fw-bold">{{ u.name }}</div>
+                                <div class="small text-muted">{{ u.email }}</div>
+                            </td>
+                            <td>
+                                <span class="badge badge-primary">{{ u.role }}</span>
+                            </td>
+                            <td style="padding-right: 40px;">
+                                <div class="small fw-bold">{{ u.created_at.strftime('%Y-%m-%d') }}</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock %}

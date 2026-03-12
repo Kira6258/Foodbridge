@@ -1,94 +1,107 @@
 {% extends 'base.html' %}
 {% block title %}Volunteer Dashboard - FoodBridge{% endblock %}
 {% block content %}
-<div class="dash-welcome" style="background: var(--primary); color: white; padding: 40px;">
-    <div>
-        <h2 style="margin-bottom: 8px;">Ready to Make a Difference?</h2>
-        <p style="opacity: 0.9;">Find available pickups near you and help deliver food to those in need.</p>
+<div class="animate-fade-up">
+    <div class="dash-welcome mb-5" style="background: var(--grad-primary); border: none;">
+        <div style="color: white;">
+            <h1 class="fw-bold" style="font-size: 2.5rem; margin-bottom: 8px;">Hero in Motion</h1>
+            <p style="font-size: 1.1rem; opacity: 0.9;">{{ current_user.name }}, find available pickups and bridge the gap today.</p>
+        </div>
+        <div class="icon-box" style="width: 80px; height: 80px; font-size: 2.5rem; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2);">
+            <i class="fas fa-truck-fast"></i>
+        </div>
     </div>
-    <div class="icon-box" style="background: rgba(255,255,255,0.2); color: #fff;">
-        <i class="fas fa-truck-loading"></i>
-    </div>
-</div>
 
-<div class="grid-main">
-    <!-- Available Pickups -->
-    <main class="main-content">
-        <h4 class="fw-bold mb-4 d-flex align-center">
-            <i class="fas fa-map-marker-alt text-primary" style="margin-right: 12px;"></i>
-            Available Pickups
-        </h4>
+    <div class="grid-main">
+        <!-- Available Pickups -->
+        <main class="main-content">
+            <h4 class="sidebar-header">
+                <i class="fas fa-route"></i>
+                Pickups Waiting For You
+            </h4>
 
-        <div class="d-flex flex-column gap-2">
-            {% for task in tasks %}
-            <div class="card donation-card"
-                style="display: flex; flex-direction: row; align-items: center; padding: 20px;">
-                <div class="icon-box" style="margin-right: 20px; flex-shrink: 0;">
-                    <i class="fas fa-box-open"></i>
-                </div>
-                <div style="flex-grow: 1;">
-                    <div class="d-flex justify-between align-center mb-1">
-                        <h5 class="fw-bold">{{ task.food_description }}</h5>
-                        <span class="text-primary fw-bold">{% if task.distance %}{{ task.distance }} km away{% else
-                            %}Nearby{% endif %}</span>
+            <div class="d-flex flex-column gap-3">
+                {% for task in tasks %}
+                <div class="card d-flex align-center gap-3" style="padding: 24px;">
+                    <div class="icon-box flex-shrink-0" style="width: 56px; height: 56px;">
+                        <i class="fas fa-box-open" style="font-size: 1.4rem;"></i>
                     </div>
-                    <p class="small mb-1"><strong>From:</strong> {{ task.donor_name }}</p>
-                    <p class="small text-muted"><strong>To:</strong> {{ task.shelter_name }} ({{ task.shelter_address
-                        }})</p>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-between align-center mb-2">
+                            <h4 class="fw-bold" style="color: var(--primary); margin-bottom: 0;">{{ task.food_description }}</h4>
+                            <span class="badge badge-primary">
+                                <i class="fas fa-location-dot" style="margin-right: 5px;"></i> {% if task.distance %}{{ task.distance }} km{% else %}Nearby{% endif %}
+                            </span>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                            <p class="small"><strong><i class="fas fa-parachute-box text-primary" style="width: 20px;"></i> From:</strong> {{ task.donor_name }}</p>
+                            <p class="small text-muted"><strong><i class="fas fa-building-ngo text-primary" style="width: 20px;"></i> To:</strong> {{ task.shelter_name }}</p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <form action="{{ url_for('volunteer.accept_delivery', donation_id=task.id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary">Accept Task</button>
+                        </form>
+                    </div>
                 </div>
-                <div style="margin-left: 20px;">
-                    <form action="{{ url_for('volunteer.accept_delivery', donation_id=task.id) }}" method="POST">
-                        <button type="submit" class="btn btn-primary">Accept</button>
-                    </form>
-                </div>
-            </div>
-            {% else %}
-            <div class="card" style="text-align: center; padding: 40px; opacity: 0.6;">
-                <p>No pending pickups available right now.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </main>
-
-    <!-- My Deliveries -->
-    <aside class="sidebar">
-        <h4 class="fw-bold mb-4 d-flex align-center">
-            <i class="fas fa-route text-primary" style="margin-right: 12px;"></i>
-            My Deliveries
-        </h4>
-
-        <div class="d-flex flex-column gap-2">
-            {% for deliv in deliveries %}
-            <div class="card" style="padding: 16px; border-left: 4px solid 
-                {% if deliv.status == 'DELIVERED' %}var(--success)
-                {% else %}var(--accent){% endif %};">
-
-                <h6 class="fw-bold mb-2">{{ deliv.food_description }}</h6>
-                <p class="small text-muted mb-4">To: {{ deliv.shelter_name }}</p>
-
-                {% if deliv.status != 'DELIVERED' %}
-                <form action="{{ url_for('volunteer.update_status', delivery_id=deliv.id) }}" method="POST">
-                    <select name="status" class="form-select mb-2" onchange="this.form.submit()"
-                        style="padding: 8px; font-size: 0.85rem;">
-                        <option value="ASSIGNED" {% if deliv.status=='ASSIGNED' %}selected{% endif %}>Assigned</option>
-                        <option value="PICKED UP" {% if deliv.status=='PICKED UP' %}selected{% endif %}>Picked Up
-                        </option>
-                        <option value="ON THE WAY" {% if deliv.status=='ON THE WAY' %}selected{% endif %}>On The Way
-                        </option>
-                        <option value="DELIVERED" {% if deliv.status=='DELIVERED' %}selected{% endif %}>Delivered
-                        </option>
-                    </select>
-                </form>
                 {% else %}
-                <span class="badge badge-success">Completed</span>
-                {% endif %}
+                <div class="empty-state dashed">
+                    <i class="fas fa-peace mb-3"></i>
+                    <h5 class="fw-bold">Quiet on the road.</h5>
+                    <p>No pending pickups available right now.</p>
+                </div>
+                {% endfor %}
             </div>
-            {% else %}
-            <div class="card" style="text-align: center; padding: 20px; opacity: 0.6;">
-                <p class="small">No delivery history.</p>
+        </main>
+
+        <!-- My Deliveries -->
+        <aside class="sidebar-sticky">
+            <h4 class="sidebar-header">
+                <i class="fas fa-clipboard-list"></i>
+                My Active Tasks
+            </h4>
+
+            <div class="d-flex flex-column gap-3">
+                {% for deliv in deliveries %}
+                <div class="card" style="padding: 24px; border-radius: var(--radius-lg); border-left: 6px solid 
+                    {% if deliv.status == 'DELIVERED' %}var(--success)
+                    {% else %}var(--accent){% endif %};">
+
+                    <div class="d-flex justify-between align-center mb-3">
+                        <h5 class="fw-bold" style="color: var(--primary);">{{ deliv.food_description }}</h5>
+                        <span class="badge {% if deliv.status == 'DELIVERED' %}badge-success{% else %}badge-warning{% endif %}">
+                            {{ deliv.status }}
+                        </span>
+                    </div>
+                    <p class="small text-muted mb-4"><i class="fas fa-map-marker-alt"></i> Dest: {{ deliv.shelter_name }}</p>
+
+                    {% if deliv.status != 'DELIVERED' %}
+                    <form action="{{ url_for('volunteer.update_status', delivery_id=deliv.id) }}" method="POST">
+                        <div style="position: relative;">
+                            <select name="status" class="form-control" onchange="this.form.submit()"
+                                style="font-weight: 700; cursor: pointer; background: #fdfdfd; padding-right: 40px;">
+                                <option value="ASSIGNED" {% if deliv.status=='ASSIGNED' %}selected{% endif %}>🟢 Assigned</option>
+                                <option value="PICKED UP" {% if deliv.status=='PICKED UP' %}selected{% endif %}>📦 Picked Up</option>
+                                <option value="ON THE WAY" {% if deliv.status=='ON THE WAY' %}selected{% endif %}>🚚 On The Way</option>
+                                <option value="DELIVERED" {% if deliv.status=='DELIVERED' %}selected{% endif %}>✅ Delivered</option>
+                            </select>
+                            <i class="fas fa-chevron-down" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.5;"></i>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div style="text-align: center; padding: 10px; background: rgba(46, 125, 50, 0.05); border-radius: 8px;">
+                        <span class="text-success fw-bold small"><i class="fas fa-check-double"></i> Delivery Completed</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="card" style="text-align: center; padding: 40px; opacity: 0.6; border-style: dotted;">
+                    <i class="fas fa-history fa-2x mb-2"></i>
+                    <p class="small">No active deliveries.</p>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </aside>
+        </aside>
+    </div>
 </div>
-{% endblock %}
+{% endblock %}

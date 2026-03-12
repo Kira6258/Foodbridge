@@ -3,13 +3,18 @@
 {% block title %}Register - FoodBridge{% endblock %}
 
 {% block content %}
-<div class="auth-wrapper">
-    <div class="card auth-card" style="max-width: 600px;">
-        <h2 class="auth-title">Join the Mission</h2>
-        <p class="auth-subtitle">Create your FoodBridge account today</p>
+<div class="auth-section">
+    <div class="card auth-card-premium card-accent-top">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div class="icon-box" style="margin: 0 auto 20px; background: var(--grad-primary); color: white;">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="fw-bold" style="font-size: 2rem; color: var(--primary);">Join the Mission</h1>
+            <p class="text-muted">Create your FoodBridge account today.</p>
+        </div>
 
         <form id="regForm">
-            <div class="grid-2" style="margin-bottom: var(--spacing-md);">
+            <div class="grid-2">
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
                     <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
@@ -21,28 +26,26 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Email address</label>
+                <label class="form-label">Email Address</label>
                 <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Password</label>
-                <input type="password" id="regPassword" class="form-control" placeholder="Create a strong password"
-                    required>
+                <input type="password" id="regPassword" class="form-control" placeholder="Create a strong password" required>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Your Role</label>
-                <select id="roleSelect" class="form-select" required onchange="toggleShelterFields()">
-                    <option value="donor">Donor (Have surplus food)</option>
-                    <option value="shelter">Shelter (Need food for community)</option>
-                    <option value="volunteer">Volunteer (Can help deliver)</option>
+                <label class="form-label">Choose Your Role</label>
+                <select id="roleSelect" class="form-select" required onchange="toggleShelterFields()" style="font-weight: 600;">
+                    <option value="donor">🤝 Donor (I have surplus food)</option>
+                    <option value="shelter">🏠 Shelter (I need food for community)</option>
+                    <option value="volunteer">🚚 Volunteer (I can help deliver)</option>
                 </select>
             </div>
 
-            <div id="shelterFields"
-                style="display: none; margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--border);">
-                <h4 class="mb-4">Shelter Details</h4>
+            <div id="shelterFields" style="display: none; margin-top: 30px; padding-top: 30px; border-top: 1px dashed var(--border);">
+                <h4 class="fw-bold mb-4" style="color: var(--primary);">Shelter Details</h4>
                 <div class="form-group">
                     <label class="form-label">Shelter Address</label>
                     <input type="text" id="shAddress" class="form-control" placeholder="Full physical address">
@@ -59,30 +62,48 @@
                 </div>
             </div>
 
-            <div id="locationStatus" class="alert alert-warning small mt-4">
-                <span><i class="fas fa-spinner fa-spin"></i> Detecting your location...</span>
+            <div id="locationSection">
+                <div class="location-card mt-4 mb-4" id="locDisplay">
+                    <div id="locIcon" class="text-primary" style="font-size: 1.2rem;">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <p id="locText" class="small fw-bold mb-0" style="color: var(--text-main);">Detecting your location...</p>
+                        <p id="locSub" class="small text-muted mb-0" style="font-size: 0.75rem;">This helps us find nearby food hubs.</p>
+                    </div>
+                    <button type="button" id="retryLoc" class="btn btn-icon btn-sm" style="display: none;" title="Retry detection">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+
+                <div id="manualLocation" style="display: none; margin-bottom: 25px;">
+                    <label class="form-label small fw-bold">Search Your Area</label>
+                    <div class="input-group">
+                        <input type="text" id="locSearch" class="form-control" placeholder="Type city, town or area...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div id="locSuggestions" class="suggestions-list" style="display: none;"></div>
+                    <p class="small text-muted mt-2">Find your location to enable the "Create Account" button.</p>
+                </div>
             </div>
 
             <input type="hidden" id="lat">
             <input type="hidden" id="lng">
 
-            <button type="submit" id="submitBtn" class="btn btn-primary btn-block mb-4" disabled
-                style="margin-top: 10px;">
-                <span id="btnText">Detecting Location...</span>
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block mb-4" disabled style="padding: 16px;">
+                <span id="btnText">Waiting for location...</span>
             </button>
 
             <div class="hr-text"><span>OR</span></div>
 
-            <button type="button" id="googleBtn" class="btn btn-outline btn-block"
-                style="border-color: #ddd; color: var(--text-main);">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"
-                    style="margin-right: 10px;">
+            <button type="button" id="googleBtn" class="btn btn-google btn-block">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" style="margin-right: 12px;">
                 Sign up with Google
             </button>
         </form>
 
-        <div class="auth-footer">
-            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+        <div style="text-align: center; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--border);">
+            <p class="small text-muted">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary fw-bold">Sign in here</a></p>
         </div>
     </div>
 </div>
@@ -97,7 +118,6 @@
         const shelterFields = document.getElementById('shelterFields');
         shelterFields.style.display = role === 'shelter' ? 'block' : 'none';
 
-        // Make fields required if shelter is selected
         const inputs = shelterFields.querySelectorAll('input');
         inputs.forEach(input => input.required = (role === 'shelter'));
     }
@@ -106,26 +126,91 @@
     const latInput = document.getElementById('lat');
     const lngInput = document.getElementById('lng');
     const submitBtn = document.getElementById('submitBtn');
-    const locStatus = document.getElementById('locationStatus');
+    const locText = document.getElementById('locText');
+    const locIcon = document.getElementById('locIcon');
     const btnText = document.getElementById('btnText');
+    const manualLocation = document.getElementById('manualLocation');
+    const locSearch = document.getElementById('locSearch');
+    const locSuggestions = document.getElementById('locSuggestions');
+    const retryLoc = document.getElementById('retryLoc');
 
-    // Auto-detect location
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            latInput.value = position.coords.latitude;
-            lngInput.value = position.coords.longitude;
-            submitBtn.disabled = false;
-            btnText.innerText = "Create Account";
-            locStatus.className = "alert alert-success small mt-4";
-            locStatus.innerHTML = '<span><i class="fas fa-check-circle"></i> Location detected!</span>';
-        }, function (error) {
-            console.error("Location error:", error);
-            submitBtn.disabled = false;
-            btnText.innerText = "Create Account (Manual Location)";
-            locStatus.className = "alert alert-info small mt-4";
-            locStatus.innerHTML = '<span><i class="fas fa-info-circle"></i> Proceeding with manual location.</span>';
-        });
+    function updateLocation(lat, lng, address = "Location detected!") {
+        latInput.value = lat;
+        lngInput.value = lng;
+        submitBtn.disabled = false;
+        btnText.innerText = "Create Account";
+        locIcon.innerHTML = '<i class="fas fa-check-circle text-success" style="font-size: 1.5rem;"></i>';
+        locText.innerText = address;
+        locText.classList.add('text-success');
+        manualLocation.style.display = 'none';
+        retryLoc.style.display = 'block';
     }
+
+    function detectLocation() {
+        if (navigator.geolocation) {
+            locIcon.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+            locText.innerText = "Detecting your location...";
+            locText.classList.remove('text-success', 'text-error');
+            
+            navigator.geolocation.getCurrentPosition(function (position) {
+                updateLocation(position.coords.latitude, position.coords.longitude);
+            }, function (error) {
+                console.error("Location error:", error);
+                locIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-error"></i>';
+                locText.innerText = "Auto-detection failed.";
+                locText.classList.add('text-error');
+                manualLocation.style.display = 'block';
+                retryLoc.style.display = 'block';
+                btnText.innerText = "Please select location";
+            });
+        }
+    }
+
+    detectLocation();
+    retryLoc.addEventListener('click', detectLocation);
+
+    let searchTimeout;
+    locSearch.addEventListener('input', (e) => {
+        const query = e.target.value;
+        clearTimeout(searchTimeout);
+        if (query.length < 3) {
+            locSuggestions.style.display = 'none';
+            return;
+        }
+
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+                const data = await response.json();
+                
+                locSuggestions.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.innerText = item.display_name;
+                        div.onclick = () => {
+                            updateLocation(item.lat, item.lon, item.display_name);
+                            locSearch.value = item.display_name;
+                            locSuggestions.style.display = 'none';
+                        };
+                        locSuggestions.appendChild(div);
+                    });
+                    locSuggestions.style.display = 'block';
+                } else {
+                    locSuggestions.style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Geocoding error:", err);
+            }
+        }, 500);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!manualLocation.contains(e.target)) {
+            locSuggestions.style.display = 'none';
+        }
+    });
 
     async function sendToServer(idToken, extraData) {
         try {
@@ -138,7 +223,7 @@
             if (result.success) {
                 window.location.href = "{{ url_for('auth.login') }}";
             } else {
-                alert("Database Error: " + result.error);
+                alert("Registration Error: " + result.error);
             }
         } catch (error) {
             alert("Network Error: " + error.message);
@@ -162,12 +247,12 @@
 
         try {
             submitBtn.disabled = true;
-            btnText.innerText = "Registering...";
+            btnText.innerText = "Creating Account...";
             const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
             const idToken = await userCredential.user.getIdToken();
             await sendToServer(idToken, extraData);
         } catch (error) {
-            alert("Firebase Error: " + error.message);
+            alert("Auth Error: " + error.message);
             submitBtn.disabled = false;
             btnText.innerText = "Create Account";
         }
@@ -187,9 +272,9 @@
             };
             await sendToServer(idToken, extraData);
         } catch (error) {
-            alert("Google Login Error: " + error.message);
+            alert("Google Auth Error: " + error.message);
         }
     });
 
 </script>
-{% endblock %}
+{% endblock %}

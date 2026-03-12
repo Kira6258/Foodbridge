@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Firebase build and deployment files
 /firebase-debug.log
 /firebase-debug.*.log
@@ -26,3 +27,7 @@ yarn-error.log*
 
 # Environment files (local configs)
 /.env.*
+=======
+firebase-adminsdk.json
+.env
+>>>>>>> de2eb92 (Food bridge)
